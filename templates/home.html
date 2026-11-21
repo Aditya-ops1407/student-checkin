@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}A three-minute check-in{% endblock %}
+{% block bodyclass %}page-home{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <h1>See what is weighing on you, in three minutes.</h1>
+      <p class="lead">Answer a few questions about your studies and the pressures of student life. You get a picture of what affects you most, plus a screening indicator from a model trained on student survey data.</p>
+      <p class="cta-row">
+        <a class="btn btn-primary" href="{{ url_for('checkin') }}">Start the check-in</a>
+        <a class="btn btn-quiet" href="{{ url_for('how_it_works') }}">How it works</a>
+      </p>
+      <p class="fine">Free. No sign-up. Your answers are never stored.</p>
+    </div>
+
+    <figure class="sample" aria-label="Example of a result">
+      <figcaption>Example result (made-up answers)</figcaption>
+      <ul class="bars">
+        <li><span class="bar-label">Academic pressure</span><span class="track"><span class="fill l-high w90"></span></span><span class="bar-val">High</span></li>
+        <li><span class="bar-label">Sleep problems</span><span class="track"><span class="fill l-high w80"></span></span><span class="bar-val">High</span></li>
+        <li><span class="bar-label">Worry about the future</span><span class="track"><span class="fill l-mod w60"></span></span><span class="bar-val">Moderate</span></li>
+        <li><span class="bar-label">Financial pressure</span><span class="track"><span class="fill l-low w30"></span></span><span class="bar-val">Low</span></li>
+      </ul>
+      <p class="sample-note">Your result ranks eight everyday pressures from the ones you rate highest, then suggests one small step for each.</p>
+    </figure>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap narrow">
+    <h2>How the check-in goes</h2>
+    <ol class="steps">
+      <li><h3>Tell us a little about you</h3><p>Age, course year, CGPA and a few life details such as who you live with. Nothing that identifies you.</p></li>
+      <li><h3>Rate eight everyday pressures</h3><p>Academic, financial and relationship pressure, family expectations, workload, sleep, loneliness and worry about the future. Each is a quick one-to-five rating.</p></li>
+      <li><h3>Read your profile</h3><p>See which pressures stand out, what the model makes of your background answers, and where to find support.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="band band-tint">
+  <div class="wrap two-col">
+    <div>
+      <h2>What this is</h2>
+      <p>A learning project that shows how machine learning can pick up patterns in student survey data. It compares your background answers with {{ "{:,}".format(metrics.n_total) }} student responses and tells you how similar your pattern is to students who reported depression.</p>
+      <p>The pressure ratings are separate. They are a simple summary of what you tell us, so you can see your own priorities.</p>
+    </div>
+    <div>
+      <h2>What this is not</h2>
+      <p>It is not a diagnosis, and it cannot tell whether you have depression or any other condition. Only a qualified professional can do that.</p>
+      <p>The model is modest (see <a href="{{ url_for('model_page') }}">how well it performs</a>). Treat the result as a prompt to reflect, not a verdict.</p>
+    </div>
+  </div>
+</section>
+
+<section class="band support">
+  <div class="wrap support-row">
+    <div>
+      <h2>Need to talk to someone right now?</h2>
+      <p>You do not need a result to ask for help.</p>
+    </div>
+    <ul class="help-list compact">
+      {% for h in helplines %}<li><strong>{{ h.name }}</strong> <a class="num" href="tel:{{ h.number|replace('-','') }}">{{ h.number }}</a></li>{% endfor %}
+    </ul>
+  </div>
+</section>
+{% endblock %}

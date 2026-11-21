@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}How it works{% endblock %}
+{% block content %}
+<div class="wrap prose">
+  <h1>How it works</h1>
+  <p class="lead">The tool has two parts that work side by side. They answer different questions.</p>
+
+  <h2>Part 1: your stress factors</h2>
+  <p>You rate eight everyday pressures from 1 to 5. The result ranks them, labels each as low, moderate or high, and suggests one practical step for your top ones. This part uses simple rules, not machine learning. It reflects what you told us.</p>
+
+  <h2>Part 2: the machine-learning indicator</h2>
+  <p>A model was trained on a public survey of {{ "{:,}".format(metrics.n_total) }} university students who answered whether they had depression. It learned which combinations of background answers (age, semester, CGPA, family income, living situation, relationships, friend circle) were more common among those who said yes.</p>
+  <p>For your answers it produces a probability, which we convert to a percentile of the training data: how similar your pattern is to the depression-reporting pattern, compared with other students. Bands are lower (below the 40th percentile), moderate (40th to 70th) and higher (70th and above).</p>
+
+  <h2>Why the pressure ratings are not in the model</h2>
+  <p>The training dataset does not contain academic, financial or relationship pressure scores, so a model built on it cannot use them. Showing them separately keeps the two parts honest: the ratings are your own words, and the indicator only uses what the data supports.</p>
+
+  <h2>The pipeline</h2>
+  <ol class="steps plain">
+    <li><h3>Collect and clean</h3><p>Remove duplicates and unusable columns. A column that revealed the answer almost directly (self-rated health) was excluded to avoid <a href="{{ url_for('model_page') }}#leakage">data leakage</a>.</p></li>
+    <li><h3>Encode and scale</h3><p>Convert categories to numbers and scale numeric values, all inside one pipeline so training and the website treat answers identically.</p></li>
+    <li><h3>Train and compare</h3><p>Logistic Regression, Decision Tree and Random Forest, compared with repeated 5-fold cross-validation and an 80/20 hold-out split.</p></li>
+    <li><h3>Select and deploy</h3><p>The best model by ROC-AUC ({{ metrics.selected_model }}) is saved and loaded by this website.</p></li>
+  </ol>
+
+  <h2>A note on CGPA</h2>
+  <p>The dataset records CGPA on a 4.0 scale. You enter it on the Indian 10-point scale and it is converted linearly (multiplied by 0.4). This is an approximation, since grading systems differ between institutions.</p>
+</div>
+{% endblock %}

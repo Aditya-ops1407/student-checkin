@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Check-in{% endblock %}
+{% block bodyclass %}page-checkin{% endblock %}
+
+{% macro choice(name, question) %}
+<fieldset class="field" id="fld-{{ name }}">
+  <legend>{{ question }}</legend>
+  <div class="pills">
+    {% for o in config.CATEGORICAL_FEATURES[name] %}
+    <label class="pill"><input type="radio" name="{{ name }}" value="{{ o }}" required {% if values.get(name) == o %}checked{% endif %}>
+      <span>{{ config.OPTION_LABELS.get(name, {}).get(o, o) }}</span></label>
+    {% endfor %}
+  </div>
+  {% if errors.get(name) %}<p class="err" role="alert">{{ errors[name] }}</p>{% endif %}
+</fieldset>
+{% endmacro %}
+
+{% macro number(name, label, hint, step) %}
+<div class="field" id="fld-{{ name }}">
+  <label for="in-{{ name }}">{{ label }}</label>
+  <input id="in-{{ name }}" class="num-in" type="number" name="{{ name }}" inputmode="decimal" required
+         min="{{ config.NUMERIC_RANGES[name][0] }}" max="{{ config.NUMERIC_RANGES[name][1] }}" step="{{ step }}"
+         value="{{ values.get(name, '') }}" aria-describedby="hint-{{ name }}">
+  <p class="hint" id="hint-{{ name }}">{{ hint }}</p>
+  {% if errors.get(name) %}<p class="err" role="alert">{{ errors[name] }}</p>{% endif %}
+</div>
+{% endmacro %}
+
+{% block content %}
+<div class="wrap form-wrap">
+  <h1>Your check-in</h1>
+  <p class="muted">Three short steps. Answer for how things have been over the last few weeks. Nothing is saved.</p>
+
+  {% if errors %}
+  <div class="alert" role="alert">
+    <strong>Some answers need another look.</strong>
+    <ul>{% for k, m in errors.items() %}<li><a href="#fld-{{ k }}">{{ m }}</a></li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+
+  <ol class="progress" aria-label="Progress">
+    <li data-step="1">About you</li><li data-step="2">Your studies</li><li data-step="3">What weighs on you</li>
+  </ol>
+
+  <form method="post" action="{{ url_for('checkin') }}" id="checkin-form" novalidate>
+    <section class="step" data-step="1" aria-labelledby="s1">
+      <h2 id="s1">About you</h2>
+      {{ choice('Gender', 'What is your gender?') }}
+      {{ number('Age', 'How old are you?', 'In years.', 1) }}
+      {{ choice('Living_style', 'Who do you live with?') }}
+      {{ choice('Marital_status', 'What is your marital status?') }}
+      {{ choice('Relationship_status', 'How would you describe your relationship status?') }}
+      {{ choice('friend_circle', 'Do you have a close circle of friends?') }}
+      {{ choice('Family_background', 'Which best describes your family income?') }}
+    </section>
+
+    <section class="step" data-step="2" aria-labelledby="s2">
+      <h2 id="s2">Your studies</h2>
+      {{ number('Current_semester', 'Which semester are you in?', 'A number from 1 to 12.', 1) }}
+      {{ number('CGPA', 'What is your current CGPA?', 'On the 10-point scale, for example 7.8. Use your latest result.', 0.01) }}
+    </section>
+
+    <section class="step" data-step="3" aria-labelledby="s3">
+      <h2 id="s3">What weighs on you</h2>
+      <p class="muted">Rate how much each of these has affected you recently. There are no right answers.</p>
+      {% for f in config.FACTORS %}
+      <fieldset class="field rating" id="fld-f_{{ f.key }}">
+        <legend>{{ f.q }}</legend>
+        <div class="dots">
+          {% for n in range(1, 6) %}
+          <label class="dot"><input type="radio" name="f_{{ f.key }}" value="{{ n }}" required {% if ratings.get(f.key) == n %}checked{% endif %}>
+            <span class="dot-mark" aria-hidden="true">{{ n }}</span><span class="sr">{{ n }}, {{ config.SCALE_LABELS[n] }}</span></label>
+          {% endfor %}
+        </div>
+        <div class="anchors" aria-hidden="true"><span>Not at all</span><span>Extremely</span></div>
+        {% if errors.get('f_' ~ f.key) %}<p class="err" role="alert">{{ errors['f_' ~ f.key] }}</p>{% endif %}
+      </fieldset>
+      {% endfor %}
+    </section>
+
+    <div class="nav-row">
+      <button type="button" class="btn btn-quiet" id="btn-back" hidden>Back</button>
+      <button type="button" class="btn btn-primary" id="btn-next">Next</button>
+      <button type="submit" class="btn btn-primary" id="btn-submit">See my result</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

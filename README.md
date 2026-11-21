@@ -1,0 +1,66 @@
+# Student Mental Health Risk Prediction Using Machine Learning
+
+BCA project prototype (BBAU Satellite Centre, Amethi) - Aditya Jaiswal, AC-036/24.
+Pipeline from the synopsis: preprocessing -> Logistic Regression / Decision Tree /
+Random Forest comparison -> Flask questionnaire app.
+
+> Academic screening prototype only. NOT a medical diagnosis.
+
+## Run it
+
+```bash
+pip install -r requirements-train.txt   # website + training libraries
+python prepare_data.py                  # data/raw CSV -> cleaned data/student_mental_health.csv
+python train.py                         # CV, hold-out, leakage experiment, saves model + plots
+python app.py                           # open http://127.0.0.1:5000
+python -m unittest discover -s tests    # 11 tests
+```
+
+## The website
+
+| Page | URL | What it does |
+|---|---|---|
+| Home | `/` | Explains the tool, example result, helplines |
+| Check-in | `/check-in` | 3 steps: About you, Your studies, 8 stress-factor ratings (1-5). CGPA is entered on the 10-point scale |
+| Result | `POST /check-in` | Stress-factor profile + tips, ML indicator (percentile band), support numbers |
+| How it works / The model | `/how-it-works`, `/the-model` | Method, metrics tables, charts, leakage experiment |
+| Get help, About, Privacy | `/get-help`, `/about`, `/privacy` | Support, project info, data handling |
+
+Two separate parts on the result page:
+1. **Stress-factor profile**: rule-based summary of the user's own 1-5 ratings (not ML).
+2. **ML indicator**: Random Forest on background answers only (the dataset has no pressure
+   scores). Its probability is turned into a percentile of the training data's out-of-fold
+   probabilities: Lower (<40th), Moderate (40-70th), Higher (>=70th).
+The "talk to someone" box is driven by the user's own ratings; the model alone never triggers it.
+
+## Deploy
+
+```bash
+# Any host that runs a Procfile (Render, Railway, Heroku-style):
+#   build:  pip install -r requirements.txt
+#   start:  gunicorn app:app --workers 2 --timeout 60
+```
+- Commit `model/` (risk_model.joblib, metrics.json, oof_probs.json) and `static/img/`.
+- `scikit-learn` is pinned: the saved model must load with the version that trained it.
+  If you retrain on another machine, retrain with the same version or update the pin.
+- Health check: `GET /healthz`. No database, no cookies, no stored answers.
+- Security: strict Content-Security-Policy (no inline styles/scripts), 16 KB request cap,
+  server-side validation of every field.
+- The only external request is the Lexend font from Google Fonts (falls back to system fonts).
+
+## Data decisions (for the report)
+
+- **Target `Risk`** = 1 if `Depression == "Yes"` (27% positive).
+- **Model inputs**: Age, Current semester, CGPA (10-point scale converted x0.4 to the 4.0 scale), Gender,
+  Family background, Relationship status, Marital status, Living style, Friend circle. `Cost_without_study` was dropped (currency unknown, almost no effect).
+- **Excluded `Health_condition` (data leakage)**: "Critical" -> 100% depressed, "Good" -> 100% not.
+  With it ROC-AUC ~0.99; without it ~0.74. `train.py` reports both.
+- **Excluded `Home_division`**: Bangladesh-specific, not generalisable. 3 duplicate rows removed.
+
+## Limitations
+
+- Self-reported survey from one country; correlations, not causes.
+- Modest predictive power (ROC-AUC ~0.74): it is a screening aid, never a diagnosis.
+- Baseline (always "Lower Risk") has higher accuracy (73%) but zero recall, so ROC-AUC and
+  recall are used for selection instead of accuracy.
+- **Cite the exact source of the dataset in your references.**

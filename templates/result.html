@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Your result{% endblock %}
+{% block bodyclass %}page-result{% endblock %}
+{% block content %}
+{# The callout follows the person's own ratings; the model alone never triggers it. #}
+{% set talk = profile.overall == 'high' or (profile.overall == 'moderate' and ind.band == 'higher') %}
+<div class="wrap result-wrap">
+  <h1>Your check-in</h1>
+  <p class="muted">A snapshot of how things feel right now. It is not a diagnosis.</p>
+
+  {% if talk %}
+  <aside class="callout" aria-label="Support">
+    <h2>It might help to talk to someone</h2>
+    <p>Your answers point to a lot of pressure. That is common among students, and you do not have to handle it alone. Consider speaking to a friend, a family member, your college counsellor, or a free helpline such as <strong>Tele-MANAS 14416</strong> (24x7).</p>
+  </aside>
+  {% endif %}
+
+  <section class="res-sec">
+    <h2>What weighs on you most</h2>
+    <p>Overall pressure from your ratings: <strong>{{ profile.overall_text|lower }}</strong> (average {{ profile.mean }} out of 5).</p>
+    <ul class="bars big">
+      {% for r in profile.ordered %}
+      <li><span class="bar-label">{{ r.label }}</span>
+        <span class="track" role="img" aria-label="{{ r.label }}: {{ r.answer|lower }}, {{ r.value }} out of 5"><span class="fill l-{{ r.level[:3] }} w{{ r.pct }}"></span></span>
+        <span class="bar-val">{{ r.level_text }}</span></li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section class="res-sec">
+    <h2>Small steps for your top pressures</h2>
+    {% if profile.top %}
+    <ul class="tips">
+      {% for r in profile.top %}<li><h3>{{ r.label }}</h3><p>{{ r.tip }}</p></li>{% endfor %}
+    </ul>
+    {% else %}
+    <p>None of your ratings were above moderate, which is a good place to be. Keep the habits that work for you: regular sleep, movement and time with people you like.</p>
+    {% endif %}
+  </section>
+
+  <section class="res-sec">
+    <h2>What the model makes of your background answers</h2>
+    <div class="meter" role="img" aria-label="Your pattern is in the {{ ind.band_text|lower }} band, at the {{ ind.percentile|ordinal }} percentile">
+      <div class="meter-track"><span class="seg s1"></span><span class="seg s2"></span><span class="seg s3"></span>
+        <span class="marker mk{{ [[ind.percentile, 2]|max, 98]|min }}"></span></div>
+      <div class="meter-labels"><span>Lower</span><span>Moderate</span><span>Higher</span></div>
+    </div>
+    <p>Band: <strong>{{ ind.band_text }}</strong>. Your age, course year, CGPA and life details look more like the pattern of students who reported depression than {{ ind.percentile }}% of the students in the training data.</p>
+    <p class="muted">This uses only your background answers (not the pressure ratings above). The model is modest, with a ROC-AUC of about 0.74, so a "higher" band is a reason to reflect, not a finding. See <a href="{{ url_for('model_page') }}">how well it performs</a>.</p>
+  </section>
+
+  <section class="res-sec">
+    <h2>Where to get support</h2>
+    <ul class="help-list">
+      {% for h in helplines %}<li><strong>{{ h.name }}</strong> <a class="num" href="tel:{{ h.number|replace('-','') }}">{{ h.number }}</a><span>{{ h.note }}</span></li>{% endfor %}
+    </ul>
+    <p class="muted">Your college counsellor or a doctor can also help, and speaking to them early makes a difference.</p>
+  </section>
+
+  <p class="cta-row noprint">
+    <a class="btn btn-primary" href="{{ url_for('checkin') }}">Start a new check-in</a>
+    <button type="button" class="btn btn-quiet" id="btn-print">Print this page</button>
+  </p>
+</div>
+{% endblock %}

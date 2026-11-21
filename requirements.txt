@@ -1,0 +1,8 @@
+# Runtime (website). scikit-learn is pinned because the saved model must be loaded
+# by the same version that trained it.
+Flask>=3.1,<4
+gunicorn>=22
+pandas>=2.2
+numpy>=2.0
+scikit-learn==1.9.1
+joblib>=1.4

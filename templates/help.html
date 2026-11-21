@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Get help{% endblock %}
+{% block content %}
+<div class="wrap prose">
+  <h1>Get help</h1>
+  <p class="lead">You do not need a result, or to be sure something is wrong, to ask for support.</p>
+  <h2>Free helplines (India)</h2>
+  <ul class="help-list">
+    {% for h in helplines %}<li><strong>{{ h.name }}</strong> <a class="num" href="tel:{{ h.number|replace('-','') }}">{{ h.number }}</a><span>{{ h.note }}</span></li>{% endfor %}
+  </ul>
+  <h2>People close to you</h2>
+  <p>Tell one person you trust how you have been feeling: a friend, a family member, a teacher or a hostel warden. You do not need the right words. "I have not been okay lately" is enough.</p>
+  <h2>At your college</h2>
+  <p>Many colleges have a counsellor or student welfare cell. Ask your department office where it is. If your college has none, a local doctor or a government hospital's psychiatry department can help.</p>
+  <h2>If someone else is in danger</h2>
+  <p>If you think someone may hurt themselves, stay with them if you can and call <strong>112</strong> or take them to the nearest hospital.</p>
+</div>
+{% endblock %}

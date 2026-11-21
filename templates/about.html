@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}About the project{% endblock %}
+{% block content %}
+<div class="wrap prose">
+  <h1>About the project</h1>
+  <p class="lead">Student Mental Health Risk Prediction Using Machine Learning is a BCA project at Babasaheb Bhimrao Ambedkar University (Satellite Centre, Amethi).</p>
+  <h2>Aim</h2>
+  <p>To show the full machine-learning pipeline on a real problem: data cleaning, preprocessing, model comparison, evaluation and a working web application. The system is a screening aid. It does not diagnose.</p>
+  <h2>Built with</h2>
+  <p>Python, pandas, scikit-learn (Logistic Regression, Decision Tree, Random Forest), Flask, and plain HTML and CSS.</p>
+  <h2>Data</h2>
+  <p>A public student depression survey of 4,461 students (after removing duplicates). See <a href="{{ url_for('model_page') }}">The model</a> for how it was used and what was excluded and why.</p>
+  <h2>Student</h2>
+  <p>Aditya Jaiswal, BCA, enrolment AC-036/24.</p>
+</div>
+{% endblock %}

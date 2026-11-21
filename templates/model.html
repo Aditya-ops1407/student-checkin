@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}The model{% endblock %}
+{% block content %}
+<div class="wrap prose wide">
+  <h1>How well the model performs</h1>
+  <p class="lead">Trained on {{ "{:,}".format(metrics.n_total) }} students. Selected model: <strong>{{ metrics.selected_model }}</strong>, chosen for the best cross-validated ROC-AUC.</p>
+
+  <h2>Repeated 5-fold cross-validation (main result)</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Model</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1</th><th>ROC-AUC</th></tr></thead>
+    <tbody>{% for name, r in metrics.cv.items() %}
+      <tr {% if name == metrics.selected_model %}class="best"{% endif %}><td>{{ name }}</td><td>{{ r.accuracy }}</td><td>{{ r.precision }}</td><td>{{ r.recall }}</td><td>{{ r.f1 }}</td><td>{{ r.roc_auc }}</td></tr>
+    {% endfor %}</tbody>
+  </table></div>
+  <p class="muted">The baseline always predicts "lower risk". It has the best accuracy because most students in the data did not report depression, but it finds none of those who did (recall 0). The models give up some accuracy to find about 70% of them. ROC-AUC, where 0.5 is chance, is used to choose between models.</p>
+
+  <h2>80/20 hold-out split ({{ metrics.n_train }} train, {{ metrics.n_test }} test)</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Model</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1</th><th>ROC-AUC</th></tr></thead>
+    <tbody>{% for name, r in metrics.holdout.items() %}
+      <tr {% if name == metrics.selected_model %}class="best"{% endif %}><td>{{ name }}</td><td>{{ r.accuracy }}</td><td>{{ r.precision }}</td><td>{{ r.recall }}</td><td>{{ r.f1 }}</td><td>{{ r.roc_auc }}</td></tr>
+    {% endfor %}</tbody>
+  </table></div>
+
+  <h2>Charts</h2>
+  <figure><img src="{{ url_for('static', filename='img/model_comparison.png') }}" alt="Bar chart comparing the models on accuracy, precision, recall, F1 and ROC-AUC" width="1300" height="585"><figcaption>Model comparison.</figcaption></figure>
+  <figure><img src="{{ url_for('static', filename='img/confusion_matrices.png') }}" alt="Confusion matrices for each model" width="2080" height="494"><figcaption>Confusion matrices from cross-validated predictions.</figcaption></figure>
+  <figure><img src="{{ url_for('static', filename='img/feature_importance.png') }}" alt="Top feature importances for the Random Forest" width="910" height="520"><figcaption>Which answers the Random Forest relied on most.</figcaption></figure>
+  <figure><img src="{{ url_for('static', filename='img/eda.png') }}" alt="Class distribution and risk rates by group" width="1950" height="520"><figcaption>Data overview. The right-hand chart shows the column we excluded.</figcaption></figure>
+
+  <h2 id="leakage">Why one column was excluded (data leakage)</h2>
+  <p>The dataset includes a self-rated "health condition" column. Students rated "Critical" were always depressed and those rated "Good" never were, so it works like a copy of the answer. With it, ROC-AUC reaches about 0.99, which looks impressive but only reflects the leak. Without it the result is realistic:</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Model</th><th>ROC-AUC with the column</th><th>ROC-AUC without (used)</th></tr></thead>
+    <tbody>{% for name, r in metrics.leakage.items() %}<tr><td>{{ name }}</td><td>{{ r.roc_auc }}</td><td>{{ r.roc_auc_without }}</td></tr>{% endfor %}</tbody>
+  </table></div>
+
+  <h2>Limitations</h2>
+  <ul>
+    <li>Self-reported survey data from one country; patterns may not carry over to every campus.</li>
+    <li>The model finds correlations, not causes, and its predictive power is modest.</li>
+    <li>It is a screening aid and a learning project, never a diagnosis.</li>
+  </ul>
+</div>
+{% endblock %}

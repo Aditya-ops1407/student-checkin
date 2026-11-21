@@ -1,0 +1,156 @@
+{
+  "selected_model": "Random Forest",
+  "n_total": 4461,
+  "n_train": 3568,
+  "n_test": 893,
+  "baseline": "Baseline (always 'Lower')",
+  "cv": {
+    "Baseline (always 'Lower')": {
+      "accuracy": 0.731,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "roc_auc": 0.5
+    },
+    "Logistic Regression": {
+      "accuracy": 0.6,
+      "precision": 0.376,
+      "recall": 0.743,
+      "f1": 0.5,
+      "roc_auc": 0.701
+    },
+    "Decision Tree": {
+      "accuracy": 0.636,
+      "precision": 0.397,
+      "recall": 0.652,
+      "f1": 0.49,
+      "roc_auc": 0.704
+    },
+    "Random Forest": {
+      "accuracy": 0.649,
+      "precision": 0.411,
+      "recall": 0.706,
+      "f1": 0.519,
+      "roc_auc": 0.736
+    }
+  },
+  "cv_std": {
+    "Baseline (always 'Lower')": {
+      "accuracy": 0.001,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "roc_auc": 0.0
+    },
+    "Logistic Regression": {
+      "accuracy": 0.012,
+      "precision": 0.011,
+      "recall": 0.025,
+      "f1": 0.014,
+      "roc_auc": 0.019
+    },
+    "Decision Tree": {
+      "accuracy": 0.038,
+      "precision": 0.026,
+      "recall": 0.081,
+      "f1": 0.017,
+      "roc_auc": 0.016
+    },
+    "Random Forest": {
+      "accuracy": 0.018,
+      "precision": 0.019,
+      "recall": 0.041,
+      "f1": 0.025,
+      "roc_auc": 0.017
+    }
+  },
+  "holdout": {
+    "Baseline (always 'Lower')": {
+      "accuracy": 0.731,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "roc_auc": 0.5
+    },
+    "Logistic Regression": {
+      "accuracy": 0.564,
+      "precision": 0.345,
+      "recall": 0.692,
+      "f1": 0.46,
+      "roc_auc": 0.663
+    },
+    "Decision Tree": {
+      "accuracy": 0.591,
+      "precision": 0.355,
+      "recall": 0.637,
+      "f1": 0.456,
+      "roc_auc": 0.662
+    },
+    "Random Forest": {
+      "accuracy": 0.617,
+      "precision": 0.376,
+      "recall": 0.646,
+      "f1": 0.475,
+      "roc_auc": 0.692
+    }
+  },
+  "leakage": {
+    "Logistic Regression": {
+      "accuracy": 0.967,
+      "roc_auc": 0.991,
+      "roc_auc_without": 0.701
+    },
+    "Decision Tree": {
+      "accuracy": 0.979,
+      "roc_auc": 0.994,
+      "roc_auc_without": 0.704
+    },
+    "Random Forest": {
+      "accuracy": 0.983,
+      "roc_auc": 0.998,
+      "roc_auc_without": 0.736
+    }
+  },
+  "confusion_matrices": {
+    "Baseline (always 'Lower')": [
+      [
+        3263,
+        0
+      ],
+      [
+        1198,
+        0
+      ]
+    ],
+    "Logistic Regression": [
+      [
+        1787,
+        1476
+      ],
+      [
+        308,
+        890
+      ]
+    ],
+    "Decision Tree": [
+      [
+        2025,
+        1238
+      ],
+      [
+        398,
+        800
+      ]
+    ],
+    "Random Forest": [
+      [
+        2048,
+        1215
+      ],
+      [
+        351,
+        847
+      ]
+    ]
+  }
+}
