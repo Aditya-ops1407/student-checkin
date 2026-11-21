@@ -176,7 +176,7 @@ metrics = {
 }
 json.dump(metrics, open(C.METRICS_PATH, "w"), indent=2)
 import os, shutil
-os.makedirs("static/img", exist_ok=True)
+os.makedirs("public/img", exist_ok=True)
 for f in ["eda", "model_comparison", "confusion_matrices", "feature_importance"]:
-    shutil.copy(f"reports/{f}.png", f"static/img/{f}.png")
+    shutil.copy(f"reports/{f}.png", f"public/img/{f}.png")
 print("Saved model, metrics, probabilities and plots.")

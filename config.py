@@ -1,4 +1,7 @@
 """Shared configuration (Student Depression Dataset + stress-factor questionnaire)."""
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent   # absolute paths: works under gunicorn and Vercel
 
 TARGET = "Risk"
 
@@ -76,7 +79,7 @@ HELPLINES = [
     {"name": "Emergency", "number": "112", "note": "If you or someone else is in immediate danger."},
 ]
 
-MODEL_PATH = "model/risk_model.joblib"
-METRICS_PATH = "model/metrics.json"
-OOF_PATH = "model/oof_probs.json"
-DATA_PATH = "data/student_mental_health.csv"
+MODEL_PATH = str(BASE_DIR / "model" / "risk_model.joblib")
+METRICS_PATH = str(BASE_DIR / "model" / "metrics.json")
+OOF_PATH = str(BASE_DIR / "model" / "oof_probs.json")
+DATA_PATH = str(BASE_DIR / "data" / "student_mental_health.csv")

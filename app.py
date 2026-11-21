@@ -17,7 +17,8 @@ from flask import Flask, jsonify, render_template, request
 
 import config as C
 
-app = Flask(__name__)
+# Vercel serves public/ from its CDN at the site root; the same layout works locally.
+app = Flask(__name__, static_folder="public", static_url_path="")
 app.config["MAX_CONTENT_LENGTH"] = 16 * 1024      # forms are tiny; reject anything bigger
 
 model = joblib.load(C.MODEL_PATH)

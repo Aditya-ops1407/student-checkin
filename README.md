@@ -33,14 +33,23 @@ Two separate parts on the result page:
    probabilities: Lower (<40th), Moderate (40-70th), Higher (>=70th).
 The "talk to someone" box is driven by the user's own ratings; the model alone never triggers it.
 
-## Deploy
+## Deploy on Vercel
+
+1. Push this folder to GitHub (the repo root must contain `app.py`, `vercel.json`, `.python-version`).
+2. On vercel.com: Add New > Project > import the repo. Framework preset: Other/auto-detected Flask.
+   Leave build/output settings empty. Click Deploy.
+3. Static files live in `public/` (Vercel serves that folder from its CDN; Flask's own static folder is not used there).
+4. `.python-version` pins Python 3.13; `scikit-learn` is pinned to 1.9.1 to match the saved model.
+5. Check `/healthz`, then run one full check-in.
+
+## Deploy elsewhere (Render, Railway, any Procfile host)
 
 ```bash
 # Any host that runs a Procfile (Render, Railway, Heroku-style):
 #   build:  pip install -r requirements.txt
 #   start:  gunicorn app:app --workers 2 --timeout 60
 ```
-- Commit `model/` (risk_model.joblib, metrics.json, oof_probs.json) and `static/img/`.
+- Commit `model/` (risk_model.joblib, metrics.json, oof_probs.json) and `public/img/`.
 - `scikit-learn` is pinned: the saved model must load with the version that trained it.
   If you retrain on another machine, retrain with the same version or update the pin.
 - Health check: `GET /healthz`. No database, no cookies, no stored answers.
