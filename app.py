@@ -16,6 +16,7 @@ import pandas as pd
 from flask import Flask, jsonify, render_template, request
 
 import config as C
+from recommendations import build_plan
 
 # Vercel serves public/ from its CDN at the site root; the same layout works locally.
 app = Flask(__name__, static_folder="public", static_url_path="")
@@ -52,6 +53,30 @@ def validate(form):
         else:
             clean[col] = val
 
+    # Lifestyle and study-hours choices (do not feed the ML model)
+    life, study = {}, None
+    for q in C.LIFESTYLE:
+        val = form.get(q["key"], "")
+        if val not in dict(q["options"]):
+            errors[q["key"]] = "Choose one of the options."
+        else:
+            life[q["key"]] = val
+    val = form.get(C.STUDY_HOURS["key"], "")
+    if val not in dict(C.STUDY_HOURS["options"]):
+        errors[C.STUDY_HOURS["key"]] = "Choose one of the options."
+    else:
+        study = val
+
+    # Mood screen: PHQ-2 and GAD-2 items scored 0-3
+    mood = {}
+    for item in C.MOOD_ITEMS:
+        raw = form.get(f"m_{item['key']}", "")
+        if raw not in {"0", "1", "2", "3"}:
+            errors[f"m_{item['key']}"] = "Choose how often this has bothered you."
+        else:
+            mood[item["key"]] = int(raw)
+
+    # Stress-factor ratings 1-5
     ratings = {}
     for fac in C.FACTORS:
         raw = form.get(f"f_{fac['key']}", "")
@@ -59,7 +84,8 @@ def validate(form):
             errors[f"f_{fac['key']}"] = "Pick a rating from 1 to 5."
         else:
             ratings[fac["key"]] = int(raw)
-    return clean, ratings, errors
+    extras = {"ratings": ratings, "life": life, "study": study, "mood": mood}
+    return clean, extras, errors
 
 
 def level_for(score):
@@ -82,12 +108,12 @@ def factor_profile(ratings):
                      "level_text": LEVEL_TEXT[level_for(v)],
                      "answer": C.SCALE_LABELS[v]})
     mean = sum(r["value"] for r in rows) / len(rows)
-    top = [r for r in sorted(rows, key=lambda r: -r["value"]) if r["value"] >= 3][:3]
-    overall = "high" if mean >= 3.5 or sum(r["value"] >= 4 for r in rows) >= 3 \
-        else "moderate" if mean >= 2.5 else "low"
+    ordered = sorted(rows, key=lambda r: -r["value"])
+    n_high = sum(r["value"] >= 4 for r in rows)
+    overall = "high" if mean >= 3.5 or n_high >= 5 else "moderate" if mean >= 2.5 else "low"
     return {"rows": rows, "mean": round(mean, 1), "overall": overall,
-            "overall_text": LEVEL_TEXT[overall], "top": top,
-            "ordered": sorted(rows, key=lambda r: -r["value"])}
+            "overall_text": LEVEL_TEXT[overall], "n_high": n_high,
+            "ordered": ordered, "shown": ordered[:6], "rest": ordered[6:]}
 
 
 def model_indicator(clean):
@@ -141,13 +167,15 @@ def home():
 def checkin():
     if request.method == "GET":
         return render_template("checkin.html", errors={}, values={},
-                               config=C, ratings={})
-    clean, ratings, errors = validate(request.form)
+                               config=C, ratings={}, mood={})
+    clean, extras, errors = validate(request.form)
     if errors:
         return render_template("checkin.html", errors=errors, values=request.form,
-                               config=C, ratings=ratings), 400
-    return render_template("result.html", profile=factor_profile(ratings),
-                           ind=model_indicator(clean))
+                               config=C, ratings=extras["ratings"], mood=extras["mood"]), 400
+    profile = factor_profile(extras["ratings"])
+    plan = build_plan(extras["ratings"], extras["life"], extras["study"], extras["mood"],
+                      {"friend_circle": clean["friend_circle"], "living_style": clean["Living_style"]})
+    return render_template("result.html", profile=profile, plan=plan, ind=model_indicator(clean))
 
 
 @app.route("/how-it-works")

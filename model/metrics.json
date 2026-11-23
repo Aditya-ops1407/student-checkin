@@ -4,6 +4,16 @@
   "n_train": 3568,
   "n_test": 893,
   "baseline": "Baseline (always 'Lower')",
+  "oof_auc": {
+    "Logistic Regression": 0.701,
+    "Decision Tree": 0.704,
+    "Random Forest": 0.736
+  },
+  "oof_ap": {
+    "Logistic Regression": 0.431,
+    "Decision Tree": 0.443,
+    "Random Forest": 0.497
+  },
   "cv": {
     "Baseline (always 'Lower')": {
       "accuracy": 0.731,

@@ -43,34 +43,51 @@ OPTION_LABELS = {
     "friend_circle": {"Yes": "Yes", "No": "Not really"},
 }
 
+# ---- Questions that do NOT feed the ML model --------------------------------------
+# They drive the stress profile, the mood screen and the personalised plan.
+STUDY_HOURS = {"key": "study_hours", "q": "On an average day, how many hours do you spend studying on your own (classes excluded)?",
+               "options": [("lt2", "Under 2 hours"), ("2-4", "2 to 4 hours"), ("5-7", "5 to 7 hours"), ("8+", "8 hours or more")]}
+
+LIFESTYLE = [
+    {"key": "sleep_hours", "q": "How many hours do you usually sleep at night?",
+     "options": [("lt5", "Under 5 hours"), ("5-6", "5 to 6 hours"), ("7-8", "7 to 8 hours"), ("9+", "More than 8 hours")]},
+    {"key": "activity", "q": "On how many days a week do you do at least 30 minutes of physical activity (walking, sports, gym, yoga)?",
+     "options": [("0", "Almost never"), ("1-2", "1 to 2 days"), ("3-4", "3 to 4 days"), ("5+", "5 or more days")]},
+    {"key": "screen", "q": "How much time do you spend on your phone or screens each day, not counting study?",
+     "options": [("lt2", "Under 2 hours"), ("2-4", "2 to 4 hours"), ("4-6", "4 to 6 hours"), ("6+", "More than 6 hours")]},
+    {"key": "meals", "q": "How regular are your meals?",
+     "options": [("regular", "Regular most days"), ("sometimes", "I skip meals sometimes"), ("rarely", "I skip meals often")]},
+]
+
+# Standard two-question screeners (public domain): PHQ-2 (low mood) and GAD-2 (anxiety).
+# Score each item 0-3; a total of 3 or more on either pair is the usual point for a fuller check.
+MOOD_SCALE = [(0, "Not at all"), (1, "Several days"), (2, "More than half the days"), (3, "Nearly every day")]
+MOOD_ITEMS = [
+    {"key": "phq1", "q": "Little interest or pleasure in doing things", "group": "phq"},
+    {"key": "phq2", "q": "Feeling down, depressed or hopeless", "group": "phq"},
+    {"key": "gad1", "q": "Feeling nervous, anxious or on edge", "group": "gad"},
+    {"key": "gad2", "q": "Not being able to stop or control worrying", "group": "gad"},
+]
+MOOD_CUTOFF = 3
+
 # ---- Stress factors (self-rated 1-5; NOT fed to the ML model) -------------------
 SCALE_LABELS = {1: "Not at all", 2: "A little", 3: "Moderately", 4: "A lot", 5: "Extremely"}
 
 FACTORS = [
-    {"key": "academic", "label": "Academic pressure",
-     "q": "How much pressure do exams, grades and assignments put on you?",
-     "tip": "Break big tasks into small daily targets, and ask a teacher or senior about what matters most for the exam."},
-    {"key": "financial", "label": "Financial pressure",
-     "q": "How much do money worries (fees, living costs, family finances) weigh on you?",
-     "tip": "Check scholarship, fee-instalment and part-time options with your college office; talking about money early usually helps."},
-    {"key": "relationship", "label": "Relationship pressure",
-     "q": "How much stress do your relationships (partner, friends, family) cause you?",
-     "tip": "Pick one conversation you have been avoiding and plan a calm time to have it, or talk it through with someone neutral first."},
-    {"key": "family", "label": "Family expectations",
-     "q": "How heavy do expectations from your family feel?",
-     "tip": "Share your real progress and limits with one trusted family member; expectations often ease once they are spoken."},
-    {"key": "workload", "label": "Workload and deadlines",
-     "q": "How overwhelming is your overall workload and the number of deadlines?",
-     "tip": "Write every deadline in one place, rank them, and protect one short break each day."},
-    {"key": "sleep", "label": "Sleep problems",
-     "q": "How much trouble do you have sleeping (falling asleep, waking up, feeling rested)?",
-     "tip": "Keep a fixed wake-up time, stop screens 30 minutes before bed, and avoid late-night caffeine."},
-    {"key": "loneliness", "label": "Loneliness",
-     "q": "How often do you feel alone or without people you can talk to?",
-     "tip": "Join one low-pressure group (club, study circle, sports) and message one person today, even briefly."},
-    {"key": "future", "label": "Worry about the future",
-     "q": "How much do you worry about your career, placements or what comes after college?",
-     "tip": "Turn the worry into one concrete next step this week (a skill, a project, a mentor chat)."},
+    {"key": "academic", "label": "Academic pressure", "q": "How much pressure do exams, grades and assignments put on you?"},
+    {"key": "exam", "label": "Exam and result anxiety", "q": "How anxious do you feel before exams or when results are due?"},
+    {"key": "workload", "label": "Workload and deadlines", "q": "How overwhelming is your overall workload and the number of deadlines?"},
+    {"key": "financial", "label": "Financial pressure", "q": "How much do money worries (fees, living costs, family finances) weigh on you?"},
+    {"key": "relationship", "label": "Relationship pressure", "q": "How much stress do your relationships (partner, friends, family) cause you?"},
+    {"key": "family", "label": "Family expectations", "q": "How heavy do expectations from your family feel?"},
+    {"key": "loneliness", "label": "Loneliness", "q": "How often do you feel alone or without people you can talk to?"},
+    {"key": "support", "label": "Feeling unsupported at college", "q": "How unsupported do you feel by your teachers or college?"},
+    {"key": "future", "label": "Worry about the future", "q": "How much do you worry about your career, placements or what comes after college?"},
+    {"key": "compare", "label": "Comparing yourself with others", "q": "How much do you compare yourself with classmates or people online and feel worse?"},
+    {"key": "focus", "label": "Trouble concentrating", "q": "How much trouble do you have concentrating on your studies?"},
+    {"key": "motivation", "label": "Low motivation or energy", "q": "How often do you feel you have no energy or motivation to start things?"},
+    {"key": "sleep", "label": "Sleep problems", "q": "How much trouble do you have sleeping (falling asleep, waking up, feeling rested)?"},
+    {"key": "health", "label": "Health and tiredness", "q": "How much do health problems or constant tiredness affect you?"},
 ]
 
 HELPLINES = [

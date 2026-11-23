@@ -26,10 +26,23 @@
 </div>
 {% endmacro %}
 
+{% macro options(name, question, opts) %}
+<fieldset class="field" id="fld-{{ name }}">
+  <legend>{{ question }}</legend>
+  <div class="pills">
+    {% for val, text in opts %}
+    <label class="pill"><input type="radio" name="{{ name }}" value="{{ val }}" required {% if values.get(name) == val %}checked{% endif %}>
+      <span>{{ text }}</span></label>
+    {% endfor %}
+  </div>
+  {% if errors.get(name) %}<p class="err" role="alert">{{ errors[name] }}</p>{% endif %}
+</fieldset>
+{% endmacro %}
+
 {% block content %}
 <div class="wrap form-wrap">
   <h1>Your check-in</h1>
-  <p class="muted">Three short steps. Answer for how things have been over the last few weeks. Nothing is saved.</p>
+  <p class="muted">32 short questions in five steps, about five minutes. Answer for how things have been over the last few weeks. Nothing is saved.</p>
 
   {% if errors %}
   <div class="alert" role="alert">
@@ -39,7 +52,7 @@
   {% endif %}
 
   <ol class="progress" aria-label="Progress">
-    <li data-step="1">About you</li><li data-step="2">Your studies</li><li data-step="3">What weighs on you</li>
+    <li data-step="1">About you</li><li data-step="2">Studies</li><li data-step="3">Daily life</li><li data-step="4">Mood</li><li data-step="5">Pressures</li>
   </ol>
 
   <form method="post" action="{{ url_for('checkin') }}" id="checkin-form" novalidate>
@@ -58,11 +71,35 @@
       <h2 id="s2">Your studies</h2>
       {{ number('Current_semester', 'Which semester are you in?', 'A number from 1 to 12.', 1) }}
       {{ number('CGPA', 'What is your current CGPA?', 'On the 10-point scale, for example 7.8. Use your latest result.', 0.01) }}
+      {{ options(config.STUDY_HOURS.key, config.STUDY_HOURS.q, config.STUDY_HOURS.options) }}
     </section>
 
     <section class="step" data-step="3" aria-labelledby="s3">
-      <h2 id="s3">What weighs on you</h2>
-      <p class="muted">Rate how much each of these has affected you recently. There are no right answers.</p>
+      <h2 id="s3">Daily life</h2>
+      <p class="muted">Sleep, movement, screens and food have a big effect on how we feel. Your answers shape the suggestions you get.</p>
+      {% for q in config.LIFESTYLE %}{{ options(q.key, q.q, q.options) }}{% endfor %}
+    </section>
+
+    <section class="step" data-step="4" aria-labelledby="s4">
+      <h2 id="s4">Your mood</h2>
+      <p class="muted">Over the last 2 weeks, how often have you been bothered by the following? These are four standard screening questions used by doctors worldwide. They give a signal, not a diagnosis.</p>
+      {% for m in config.MOOD_ITEMS %}
+      <fieldset class="field" id="fld-m_{{ m.key }}">
+        <legend>{{ m.q }}</legend>
+        <div class="pills mood">
+          {% for val, text in config.MOOD_SCALE %}
+          <label class="pill"><input type="radio" name="m_{{ m.key }}" value="{{ val }}" required {% if mood.get(m.key) == val %}checked{% endif %}>
+            <span>{{ text }}</span></label>
+          {% endfor %}
+        </div>
+        {% if errors.get('m_' ~ m.key) %}<p class="err" role="alert">{{ errors['m_' ~ m.key] }}</p>{% endif %}
+      </fieldset>
+      {% endfor %}
+    </section>
+
+    <section class="step" data-step="5" aria-labelledby="s5">
+      <h2 id="s5">What weighs on you</h2>
+      <p class="muted">Rate how much each of these has affected you recently, from 1 (not at all) to 5 (extremely). There are no right answers.</p>
       {% for f in config.FACTORS %}
       <fieldset class="field rating" id="fld-f_{{ f.key }}">
         <legend>{{ f.q }}</legend>

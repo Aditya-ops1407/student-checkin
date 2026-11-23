@@ -21,14 +21,19 @@ python -m unittest discover -s tests    # 11 tests
 | Page | URL | What it does |
 |---|---|---|
 | Home | `/` | Explains the tool, example result, helplines |
-| Check-in | `/check-in` | 3 steps: About you, Your studies, 8 stress-factor ratings (1-5). CGPA is entered on the 10-point scale |
-| Result | `POST /check-in` | Stress-factor profile + tips, ML indicator (percentile band), support numbers |
+| Check-in | `/check-in` | 32 questions in 5 steps: About you, Studies, Daily life, Mood (PHQ-2 + GAD-2), 14 pressure ratings (1-5). CGPA is entered on the 10-point scale |
+| Result | `POST /check-in` | Summary, strengths, pressure profile, personalised plan, first-week list, ML indicator, support numbers |
 | How it works / The model | `/how-it-works`, `/the-model` | Method, metrics tables, charts, leakage experiment |
 | Get help, About, Privacy | `/get-help`, `/about`, `/privacy` | Support, project info, data handling |
 
-Two separate parts on the result page:
-1. **Stress-factor profile**: rule-based summary of the user's own 1-5 ratings (not ML).
-2. **ML indicator**: Random Forest on background answers only (the dataset has no pressure
+Three separate parts on the result page:
+1. **Pressure profile + mood screen**: rule-based summary of the user's own answers (not ML).
+   PHQ-2 / GAD-2 totals of 3 or more (the usual cut-off) flag "worth a check", never a diagnosis.
+2. **Personalised plan** (`recommendations.py`): a transparent rule-based recommendation engine
+   (about 18 rules). Each suggestion has a priority score, a "why you see this" sentence built from
+   the user's own answers, 2-4 steps and a time estimate; the top ones become a first-week list.
+   It is not generative AI, nothing leaves the server, and it never diagnoses or advises treatment.
+3. **ML indicator**: Random Forest on background answers only (the dataset has no pressure
    scores). Its probability is turned into a percentile of the training data's out-of-fold
    probabilities: Lower (<40th), Moderate (40-70th), Higher (>=70th).
 The "talk to someone" box is driven by the user's own ratings; the model alone never triggers it.

@@ -2,8 +2,9 @@
 {% block title %}Your result{% endblock %}
 {% block bodyclass %}page-result{% endblock %}
 {% block content %}
-{# The callout follows the person's own ratings; the model alone never triggers it. #}
-{% set talk = profile.overall == 'high' or (profile.overall == 'moderate' and ind.band == 'higher') %}
+{# The support box follows the person's own answers; the model alone never triggers it. #}
+{% set talk = plan.screen_positive or profile.overall == 'high' or (profile.overall == 'moderate' and ind.band == 'higher') %}
+{% set ptext = {'high': 'High priority', 'medium': 'Worth doing soon', 'low': 'Keep it up'} %}
 <div class="wrap result-wrap">
   <h1>Your check-in</h1>
   <p class="muted">A snapshot of how things feel right now. It is not a diagnosis.</p>
@@ -11,31 +12,73 @@
   {% if talk %}
   <aside class="callout" aria-label="Support">
     <h2>It might help to talk to someone</h2>
+    {% if plan.screen_positive %}
+    <p>Your mood answers reached the point where a short conversation with a counsellor or doctor is usually suggested. That is a common and sensible step, not a label. You can call <strong>Tele-MANAS 14416</strong> (free, 24x7) or contact your college counsellor.</p>
+    {% else %}
     <p>Your answers point to a lot of pressure. That is common among students, and you do not have to handle it alone. Consider speaking to a friend, a family member, your college counsellor, or a free helpline such as <strong>Tele-MANAS 14416</strong> (24x7).</p>
+    {% endif %}
   </aside>
+  {% endif %}
+
+  <dl class="summary">
+    <div><dt>Pressure level</dt><dd><strong>{{ profile.overall_text }}</strong><span>average {{ profile.mean }} out of 5, {{ profile.n_high }} of {{ profile.rows|length }} rated high</span></dd></div>
+    <div><dt>Mood screen</dt><dd><strong>{{ 'Worth a check' if plan.screen_positive else 'Below the usual cut-off' }}</strong><span>low mood {{ plan.phq }}/6, anxiety {{ plan.gad }}/6</span></dd></div>
+    <div><dt>Model band</dt><dd><strong>{{ ind.band_text }}</strong><span>{{ ind.percentile|ordinal }} percentile of the study data</span></dd></div>
+  </dl>
+
+  {% if plan.strengths %}
+  <section class="res-sec">
+    <h2>What is going well</h2>
+    <ul class="good">{% for s in plan.strengths %}<li>{{ s }}</li>{% endfor %}</ul>
+  </section>
   {% endif %}
 
   <section class="res-sec">
     <h2>What weighs on you most</h2>
-    <p>Overall pressure from your ratings: <strong>{{ profile.overall_text|lower }}</strong> (average {{ profile.mean }} out of 5).</p>
     <ul class="bars big">
-      {% for r in profile.ordered %}
+      {% for r in profile.shown %}
       <li><span class="bar-label">{{ r.label }}</span>
         <span class="track" role="img" aria-label="{{ r.label }}: {{ r.answer|lower }}, {{ r.value }} out of 5"><span class="fill l-{{ r.level[:3] }} w{{ r.pct }}"></span></span>
         <span class="bar-val">{{ r.level_text }}</span></li>
       {% endfor %}
     </ul>
+    {% if profile.rest %}
+    <details class="more">
+      <summary>Show the other {{ profile.rest|length }} pressures</summary>
+      <ul class="bars big">
+        {% for r in profile.rest %}
+        <li><span class="bar-label">{{ r.label }}</span>
+          <span class="track" role="img" aria-label="{{ r.label }}: {{ r.answer|lower }}, {{ r.value }} out of 5"><span class="fill l-{{ r.level[:3] }} w{{ r.pct }}"></span></span>
+          <span class="bar-val">{{ r.level_text }}</span></li>
+        {% endfor %}
+      </ul>
+    </details>
+    {% endif %}
   </section>
 
   <section class="res-sec">
-    <h2>Small steps for your top pressures</h2>
-    {% if profile.top %}
-    <ul class="tips">
-      {% for r in profile.top %}<li><h3>{{ r.label }}</h3><p>{{ r.tip }}</p></li>{% endfor %}
-    </ul>
-    {% else %}
-    <p>None of your ratings were above moderate, which is a good place to be. Keep the habits that work for you: regular sleep, movement and time with people you like.</p>
-    {% endif %}
+    <h2>Your personalised plan</h2>
+    <p>These suggestions come from your own answers. Each one says why you are seeing it. Start with the first one or two; you do not need to do everything.</p>
+    <ol class="plan">
+      {% for s in plan['items'] %}
+      <li class="plan-item p-{{ s.priority }}">
+        <h3>{{ s.title }}</h3>
+        <p class="why"><strong>Why you see this:</strong> {{ s.why }}</p>
+        <ul class="plan-steps">{% for st in s.steps %}<li>{{ st }}</li>{% endfor %}</ul>
+        <p class="plan-meta"><span>{{ ptext[s.priority] }}</span><span>Time: {{ s.time }}</span></p>
+      </li>
+      {% endfor %}
+    </ol>
+    <p class="muted">The plan comes from a transparent rule-based engine, not from a doctor or a generative AI. It offers everyday habits, not treatment. See <a href="{{ url_for('how_it_works') }}#plan">how it works</a>.</p>
+  </section>
+
+  <section class="res-sec">
+    <h2>Your first week</h2>
+    <ol class="week">
+      {% for w in plan.week %}
+      <li><span class="day">Day {{ w.day }}</span><span class="what">{{ w.text }}<em>{{ w['from'] }}</em></span></li>
+      {% endfor %}
+    </ol>
   </section>
 
   <section class="res-sec">
@@ -46,7 +89,7 @@
       <div class="meter-labels"><span>Lower</span><span>Moderate</span><span>Higher</span></div>
     </div>
     <p>Band: <strong>{{ ind.band_text }}</strong>. Your age, course year, CGPA and life details look more like the pattern of students who reported depression than {{ ind.percentile }}% of the students in the training data.</p>
-    <p class="muted">This uses only your background answers (not the pressure ratings above). The model is modest, with a ROC-AUC of about 0.74, so a "higher" band is a reason to reflect, not a finding. See <a href="{{ url_for('model_page') }}">how well it performs</a>.</p>
+    <p class="muted">This uses only your background answers (not the ratings above). The model is modest, with a ROC-AUC of about 0.74, so a "higher" band is a reason to reflect, not a finding. See <a href="{{ url_for('model_page') }}">how well it performs</a>.</p>
   </section>
 
   <section class="res-sec">

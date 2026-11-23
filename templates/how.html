@@ -3,17 +3,20 @@
 {% block content %}
 <div class="wrap prose">
   <h1>How it works</h1>
-  <p class="lead">The tool has two parts that work side by side. They answer different questions.</p>
+  <p class="lead">The tool has three parts that work side by side. They answer different questions.</p>
 
-  <h2>Part 1: your stress factors</h2>
-  <p>You rate eight everyday pressures from 1 to 5. The result ranks them, labels each as low, moderate or high, and suggests one practical step for your top ones. This part uses simple rules, not machine learning. It reflects what you told us.</p>
+  <h2>Part 1: your pressures and mood</h2>
+  <p>You rate 14 everyday pressures from 1 to 5 and answer four standard screening questions about low mood (PHQ-2) and anxiety (GAD-2). The result ranks the pressures and labels each as low, moderate or high. A total of 3 or more on either pair of screening questions is the usual point at which a doctor would suggest a fuller check. This part uses simple rules, not machine learning. It reflects what you told us.</p>
 
-  <h2>Part 2: the machine-learning indicator</h2>
+  <h2 id="plan">Part 2: your personalised plan</h2>
+  <p>A built-in recommendation engine reads your answers (pressures, sleep, activity, screen time, meals, study hours, mood and support) and scores about 18 possible suggestions. It shows the highest-scoring ones, each with the reason it was chosen and two or three concrete steps, then turns them into a first-week list. It is a transparent rule-based system, so every suggestion can be traced to your answers. It is not a generative AI, and it offers everyday habits, never diagnosis or treatment.</p>
+
+  <h2>Part 3: the machine-learning indicator</h2>
   <p>A model was trained on a public survey of {{ "{:,}".format(metrics.n_total) }} university students who answered whether they had depression. It learned which combinations of background answers (age, semester, CGPA, family income, living situation, relationships, friend circle) were more common among those who said yes.</p>
   <p>For your answers it produces a probability, which we convert to a percentile of the training data: how similar your pattern is to the depression-reporting pattern, compared with other students. Bands are lower (below the 40th percentile), moderate (40th to 70th) and higher (70th and above).</p>
 
-  <h2>Why the pressure ratings are not in the model</h2>
-  <p>The training dataset does not contain academic, financial or relationship pressure scores, so a model built on it cannot use them. Showing them separately keeps the two parts honest: the ratings are your own words, and the indicator only uses what the data supports.</p>
+  <h2>Why the other answers are not in the model</h2>
+  <p>The training dataset does not contain pressure ratings, mood screening or lifestyle questions, so a model built on it cannot use them. Showing them separately keeps the parts honest: the profile and plan use your own words, and the indicator only uses what the data supports.</p>
 
   <h2>The pipeline</h2>
   <ol class="steps plain">

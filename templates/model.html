@@ -22,11 +22,19 @@
     {% endfor %}</tbody>
   </table></div>
 
-  <h2>Charts</h2>
-  <figure><img src="{{ url_for('static', filename='img/model_comparison.png') }}" alt="Bar chart comparing the models on accuracy, precision, recall, F1 and ROC-AUC" width="1300" height="585"><figcaption>Model comparison.</figcaption></figure>
-  <figure><img src="{{ url_for('static', filename='img/confusion_matrices.png') }}" alt="Confusion matrices for each model" width="2080" height="494"><figcaption>Confusion matrices from cross-validated predictions.</figcaption></figure>
-  <figure><img src="{{ url_for('static', filename='img/feature_importance.png') }}" alt="Top feature importances for the Random Forest" width="910" height="520"><figcaption>Which answers the Random Forest relied on most.</figcaption></figure>
-  <figure><img src="{{ url_for('static', filename='img/eda.png') }}" alt="Class distribution and risk rates by group" width="1950" height="520"><figcaption>Data overview. The right-hand chart shows the column we excluded.</figcaption></figure>
+  <h2>Comparison graphs</h2>
+  <p class="chart-note muted">All graphs use cross-validated or out-of-fold predictions, so every student is scored by a model that never saw them during training.</p>
+  <div class="charts">
+  <figure><img src="{{ url_for('static', filename='img/model_comparison.png') }}" alt="Grouped bar chart of accuracy, precision, recall, F1 and ROC-AUC for the baseline and three models, with error bars" width="1400" height="672" loading="lazy"><figcaption><strong>Metrics side by side.</strong> The baseline wins on accuracy only because it never flags anyone. Random Forest has the best ROC-AUC ({{ metrics.cv['Random Forest'].roc_auc }}) and precision; Logistic Regression catches the most students (recall {{ metrics.cv['Logistic Regression'].recall }}) but with the lowest precision.</figcaption></figure>
+  <div class="chart-pair">
+  <figure><img src="{{ url_for('static', filename='img/roc_curves.png') }}" alt="ROC curves for the three models compared with chance" width="784" height="728" loading="lazy"><figcaption><strong>ROC curves.</strong> The higher and further left a curve, the better. Random Forest ({{ metrics.oof_auc['Random Forest'] }}) is above the others across most thresholds.</figcaption></figure>
+  <figure><img src="{{ url_for('static', filename='img/pr_curves.png') }}" alt="Precision-recall curves for the three models compared with chance" width="784" height="728" loading="lazy"><figcaption><strong>Precision-recall curves.</strong> All models beat chance (the dashed line), but precision falls as recall rises. That trade-off is why this is a screening aid and not a diagnosis.</figcaption></figure>
+  </div>
+  <figure><img src="{{ url_for('static', filename='img/cv_auc_boxplot.png') }}" alt="Box plot of ROC-AUC across 15 cross-validation folds for each model" width="1008" height="644" loading="lazy"><figcaption><strong>Stability across folds.</strong> Each dot is one fold. The Random Forest boxes sit above the other two with little overlap, so its edge is not an accident of one split.</figcaption></figure>
+  <figure><img src="{{ url_for('static', filename='img/confusion_matrices.png') }}" alt="Confusion matrices for each model" width="1120" height="1036" loading="lazy"><figcaption><strong>Confusion matrices.</strong> How many students each model labelled correctly and incorrectly, using cross-validated predictions.</figcaption></figure>
+  <figure><img src="{{ url_for('static', filename='img/feature_importance.png') }}" alt="Top feature importances for the Random Forest" width="910" height="520" loading="lazy"><figcaption><strong>What the Random Forest relied on most.</strong> Importance shows association in this dataset, not cause.</figcaption></figure>
+  <figure><img src="{{ url_for('static', filename='img/eda.png') }}" alt="Class distribution and risk rates by group" width="1625" height="559" loading="lazy"><figcaption><strong>Data overview.</strong> The right-hand chart shows the column we excluded for leakage.</figcaption></figure>
+  </div>
 
   <h2 id="leakage">Why one column was excluded (data leakage)</h2>
   <p>The dataset includes a self-rated "health condition" column. Students rated "Critical" were always depressed and those rated "Good" never were, so it works like a copy of the answer. With it, ROC-AUC reaches about 0.99, which looks impressive but only reflects the leak. Without it the result is realistic:</p>
@@ -34,6 +42,7 @@
     <thead><tr><th>Model</th><th>ROC-AUC with the column</th><th>ROC-AUC without (used)</th></tr></thead>
     <tbody>{% for name, r in metrics.leakage.items() %}<tr><td>{{ name }}</td><td>{{ r.roc_auc }}</td><td>{{ r.roc_auc_without }}</td></tr>{% endfor %}</tbody>
   </table></div>
+  <div class="charts"><figure><img src="{{ url_for('static', filename='img/leakage_comparison.png') }}" alt="Bar chart of ROC-AUC with and without the leaky column for each model" width="1008" height="644" loading="lazy"><figcaption><strong>The leakage effect.</strong> The red bars look excellent and are meaningless: the column almost contains the answer.</figcaption></figure></div>
 
   <h2>Limitations</h2>
   <ul>
